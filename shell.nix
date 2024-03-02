@@ -4,15 +4,28 @@
   }).pkgs
 }:
 
+let
+  # Postgresql with supa_audit extension
+  pgWithExt = pg: pg.withPackages (_: [
+    (pkgs.callPackage ./nix/supa_audit { postgresql = pg; })
+  ]);
+
+  # Audit package
+  supaAuditScript =
+    # Postgresql version, as a string
+    pgVersion: assert builtins.isString pgVersion;
+
+    pkgs.callPackage ./nix/supa_audit/pgScript.nix {
+      postgresql = pgWithExt pkgs."postgresql_${pgVersion}";
+    };
+
+in
 pkgs.mkShell {
-  buildInputs =
-    let
-      pgWithExt = { pg }: pg.withPackages (p: [ (pkgs.callPackage ./nix/supa_audit { postgresql = pg; }) ]);
-      pg_16_w_supa_audit = pkgs.callPackage ./nix/supa_audit/pgScript.nix { postgresql = pgWithExt { pg = pkgs.postgresql_16; }; };
-      pg_15_w_supa_audit = pkgs.callPackage ./nix/supa_audit/pgScript.nix { postgresql = pgWithExt { pg = pkgs.postgresql_15; }; };
-      pg_14_w_supa_audit = pkgs.callPackage ./nix/supa_audit/pgScript.nix { postgresql = pgWithExt { pg = pkgs.postgresql_14; }; };
-      pg_13_w_supa_audit = pkgs.callPackage ./nix/supa_audit/pgScript.nix { postgresql = pgWithExt { pg = pkgs.postgresql_13; }; };
-      pg_12_w_supa_audit = pkgs.callPackage ./nix/supa_audit/pgScript.nix { postgresql = pgWithExt { pg = pkgs.postgresql_12; }; };
-    in
-    [ pg_16_w_supa_audit pg_15_w_supa_audit pg_14_w_supa_audit pg_13_w_supa_audit pg_12_w_supa_audit ];
+  buildInputs = builtins.map supaAuditScript [
+    "16"
+    "15"
+    "14"
+    "13"
+    "12"
+  ];
 }
