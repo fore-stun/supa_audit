@@ -11,3 +11,7 @@ regression.*
 *.swp
 *.diff
 node_modules/
+
+# Nix
+result
+result-*
