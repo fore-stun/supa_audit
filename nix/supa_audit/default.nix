@@ -10,6 +10,10 @@ stdenv.mkDerivation {
     path = lib.cleanSource ../../.;
   };
 
+  passthru = {
+    pgVersion = postgresql.psqlSchema;
+  };
+
   installPhase = ''
     install -D -t $out/share/postgresql/extension *.sql
     install -D -t $out/share/postgresql/extension *.control
