@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/057f9aecfb71c4437d2b27d3323df7f93c010b7e";
   };
 
-  outputs = { nixpkgs, ... }:
+  outputs = { self, nixpkgs, ... }:
     let
       inherit (nixpkgs) lib;
       foldMap = f:
@@ -19,6 +19,12 @@
       {
         packages.${system} = {
           default = pkgs.callPackage ./nix/supa_audit { };
+
+          test = pkgs.callPackage ./nix/supa_audit/test.nix {
+            supaAudit = self.packages.${system}.default;
+            supaAuditShell = self.devShells.${system}.default;
+          };
+
         } // foldMap
           (pgVersion: assert builtins.isString pgVersion; {
             "supa_audit_${pgVersion}" = pkgs.callPackage ./nix/supa_audit {
