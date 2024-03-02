@@ -17,6 +17,10 @@
         pkgs = nixpkgs.legacyPackages.${system};
       in
       {
+        packages.${system} = {
+          default = pkgs.callPackage ./nix/supa_audit { };
+        };
+
         devShells.${system}.default = import ./shell.nix {
           inherit pkgs;
         };
