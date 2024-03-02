@@ -19,7 +19,19 @@
       {
         packages.${system} = {
           default = pkgs.callPackage ./nix/supa_audit { };
-        };
+        } // foldMap
+          (pgVersion: assert builtins.isString pgVersion; {
+            "supa_audit_${pgVersion}" = pkgs.callPackage ./nix/supa_audit {
+              postgresql = pkgs."postgresql_${pgVersion}";
+            };
+          })
+          [
+            "16"
+            "15"
+            "14"
+            "13"
+            "12"
+          ];
 
         devShells.${system}.default = import ./shell.nix {
           inherit pkgs;
