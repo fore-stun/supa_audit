@@ -42,5 +42,9 @@
         devShells.${system}.default = import ./shell.nix {
           inherit pkgs;
         };
+
+        checks.${system}.default = self.packages.${system}.test.overrideAttrs (_: {
+          FAIL_ON_FAILURE = true;
+        });
       });
 }
